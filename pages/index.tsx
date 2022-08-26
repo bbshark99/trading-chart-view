@@ -1,72 +1,305 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import type { NextPage } from "next";
+import { useEffect, useCallback, useRef } from "react";
 
 const Home: NextPage = () => {
+  const marketOverviewWidgetRef = useRef(null);
+  const techAnalyticsWidgetRef = useRef(null);
+  const tickerWidgetRef = useRef(null);
+
+  const loadScript = useCallback(async (url: string, bodyScript?: string) => {
+    return new Promise((resolve, reject) => {
+      const head = document.getElementsByTagName("head")[0];
+      const script = document.createElement("script") as any;
+      script.type = "text/javascript";
+      script.src = url;
+      script.onreadystatechange = resolve;
+      script.onload = resolve;
+
+      if (bodyScript) {
+        script.innerHTML = bodyScript;
+      }
+      head.appendChild(script);
+    });
+  }, []);
+
+  const loadChart = useCallback(async (symbol: string) => {
+    new (window as any).TradingView.widget({
+      autosize: true,
+      symbol: `COINBASE:${symbol}`, // COINBASE:BTCUSD
+      interval: "5",
+      timezone: "Etc/UTC",
+      theme: "dark",
+      style: "1",
+      locale: "en",
+      toolbar_bg: "#f1f3f6",
+      enable_publishing: false,
+      hide_top_toolbar: false,
+      withdateranges: false,
+      hide_side_toolbar: false,
+      save_image: false,
+      hide_legend: true,
+      container_id: "app-chart",
+    });
+  }, []);
+
+  const addMarketOverviewWidget = useCallback((ref: any) => {
+    const script = document.createElement("script");
+    script.src =
+      "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js";
+    script.async = false;
+    script.innerHTML = JSON.stringify({
+      container_id: "tv-medium-widget",
+      title: "Cryptocurrencies",
+      title_raw: "Cryptocurrencies",
+      tabs: [
+        {
+          title: "Overview",
+          title_raw: "Overview",
+          symbols: [
+            {
+              s: "CRYPTOCAP:TOTAL",
+            },
+            {
+              s: "BITSTAMP:BTCUSD",
+            },
+            {
+              s: "BITSTAMP:ETHUSD",
+            },
+            {
+              s: "FTX:SOLUSD",
+            },
+            {
+              s: "BINANCE:AVAXUSD",
+            },
+            {
+              s: "COINBASE:UNIUSD",
+            },
+          ],
+          quick_link: {
+            title: "More cryptocurrencies",
+            href: "/markets/cryptocurrencies/prices-all/",
+          },
+        },
+        {
+          title: "Bitcoin",
+          title_raw: "Bitcoin",
+          symbols: [
+            {
+              s: "BITSTAMP:BTCUSD",
+            },
+            {
+              s: "COINBASE:BTCEUR",
+            },
+            {
+              s: "COINBASE:BTCGBP",
+            },
+            {
+              s: "BITFLYER:BTCJPY",
+            },
+            {
+              s: "CEXIO:BTCRUB",
+            },
+            {
+              s: "CME:BTC1!",
+            },
+          ],
+          quick_link: {
+            title: "More Bitcoin pairs",
+            href: "/symbols/BTCUSD/markets/",
+          },
+        },
+        {
+          title: "Ethereum",
+          title_raw: "Ethereum",
+          symbols: [
+            {
+              s: "BITSTAMP:ETHUSD",
+            },
+            {
+              s: "KRAKEN:ETHEUR",
+            },
+            {
+              s: "COINBASE:ETHGBP",
+            },
+            {
+              s: "BITFLYER:ETHJPY",
+            },
+            {
+              s: "BINANCE:ETHBTC",
+            },
+            {
+              s: "BINANCE:ETHUSDT",
+            },
+          ],
+          quick_link: {
+            title: "More Ethereum pairs",
+            href: "/symbols/ETHUSD/markets/",
+          },
+        },
+        {
+          title: "Solana",
+          title_raw: "Solana",
+          symbols: [
+            {
+              s: "FTX:SOLUSD",
+            },
+            {
+              s: "BINANCE:SOLEUR",
+            },
+            {
+              s: "COINBASE:SOLGBP",
+            },
+            {
+              s: "BINANCE:SOLBTC",
+            },
+            {
+              s: "HUOBI:SOLETH",
+            },
+            {
+              s: "BINANCE:SOLUSDT",
+            },
+          ],
+          quick_link: {
+            title: "More Solana pairs",
+            href: "/symbols/SOLUSD/markets/",
+          },
+        },
+        {
+          title: "Uniswap",
+          title_raw: "Uniswap",
+          symbols: [
+            {
+              s: "COINBASE:UNIUSD",
+            },
+            {
+              s: "KRAKEN:UNIEUR",
+            },
+            {
+              s: "COINBASE:UNIGBP",
+            },
+            {
+              s: "BINANCE:UNIBTC",
+            },
+            {
+              s: "KRAKEN:UNIETH",
+            },
+            {
+              s: "BINANCE:UNIUSDT",
+            },
+          ],
+          quick_link: {
+            title: "More Uniswap pairs",
+            href: "/symbols/UNIUSD/markets/",
+          },
+        },
+      ],
+      title_link: "/markets/cryptocurrencies/prices-all/",
+      width: 400,
+      height: 660,
+      showChart: true,
+      showFloatingTooltip: false,
+      locale: "en",
+      plotLineColorGrowing: "#2962FF",
+      plotLineColorFalling: "#2962FF",
+      belowLineFillColorGrowing: "rgba(41, 98, 255, 0.12)",
+      belowLineFillColorFalling: "rgba(41, 98, 255, 0.12)",
+      belowLineFillColorGrowingBottom: "rgba(41, 98, 255, 0)",
+      belowLineFillColorFallingBottom: "rgba(41, 98, 255, 0)",
+      gridLineColor: "rgba(42, 46, 57, 0)",
+      scaleFontColor: "rgba(120, 123, 134, 1)",
+      showSymbolLogo: true,
+      symbolActiveColor: "rgba(41, 98, 255, 0.12)",
+      colorTheme: "dark",
+    });
+    ref.current.appendChild(script);
+  }, []);
+
+  const addTechAnalyticsWiedget = useCallback((ref: any) => {
+    const script = document.createElement("script");
+    script.src =
+      "https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js";
+    script.async = false;
+    script.innerHTML = JSON.stringify({
+      interval: "1m",
+      width: 425,
+      isTransparent: false,
+      height: 450,
+      symbol: "COINBASE:BTCUSD",
+      showIntervalTabs: true,
+      locale: "en",
+      colorTheme: "dark",
+    });
+    ref.current.appendChild(script);
+  }, []);
+
+  const addTicketWidget = useCallback((ref: any) => {
+    const script = document.createElement("script");
+    script.src =
+      "https://s3.tradingview.com/external-embedding/embed-widget-tickers.js";
+    script.async = false;
+    script.innerHTML = JSON.stringify({
+      symbols: [
+        {
+          proName: "COINBASE:BTCUSD",
+          title: "Bitcoin",
+        },
+        {
+          proName: "COINBASE:ETHUSD",
+          title: "Ethereum",
+        },
+        {
+          description: "Solana",
+          proName: "COINBASE:SOLUSDT",
+        },
+        {
+          description: "Doge",
+          proName: "COINBASE:DOGEUSDT",
+        },
+      ],
+      colorTheme: "dark",
+      isTransparent: false,
+      showSymbolLogo: true,
+      locale: "en",
+    });
+    ref.current.appendChild(script);
+  }, []);
+
+  const initialize = useCallback(async () => {
+    if (!(window as any)?.TradingView) {
+      await loadScript("https://s3.tradingview.com/tv.js");
+    }
+    await loadChart("BTCUSD");
+  }, []);
+
+  useEffect(() => {
+    initialize();
+
+    if (!!!(marketOverviewWidgetRef?.current as any).innerHTML) {
+      addMarketOverviewWidget(marketOverviewWidgetRef);
+    }
+    if (!!!(techAnalyticsWidgetRef?.current as any).innerHTML) {
+      addTechAnalyticsWiedget(techAnalyticsWidgetRef);
+    }
+    if (!!!(tickerWidgetRef?.current as any).innerHTML) {
+      addTicketWidget(tickerWidgetRef);
+    }
+  }, []);
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <meta name="description" content="Generated by create next app" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+    <div className="app-container">
+      <p className="app-container__header">BTCUSD Trading Chart View</p>
+      <div className="app-container__body">
+        <div className="app-chart">
+          <div ref={tickerWidgetRef} />
+          <div id="app-chart" />
         </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
+        <div className="app-widget-chart">
+          <div ref={marketOverviewWidgetRef} />
+          <div ref={techAnalyticsWidgetRef} />
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
